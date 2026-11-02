@@ -17,6 +17,19 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (function () {
+    try {
+      var stored = localStorage.getItem('buryit.theme');
+      var theme = stored === 'light' || stored === 'dark'
+        ? stored
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', theme);
+    } catch (err) {
+      document.documentElement.setAttribute('data-theme', 'light');
+    }
+  })();
+</script>
 <style>
   :root {
     --white: #FFFFFF;
@@ -30,6 +43,15 @@
     --ease: 150ms ease;
   }
 
+  html[data-theme="dark"] {
+    --white: #0a0a0a;
+    --bg-secondary: #1a1a1a;
+    --ink: #f5f5f7;
+    --black: #ffffff;
+    --meta: #8e8e93;
+    --line: rgba(255,255,255,.1);
+  }
+
   * { box-sizing: border-box; }
   html, body { margin: 0; padding: 0; }
 
@@ -39,6 +61,7 @@
     color: var(--ink);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
+    transition: background var(--ease), color var(--ease);
   }
 
   .visually-hidden {
@@ -68,6 +91,12 @@
     outline-offset: 2px;
   }
 
+  /* ---------- Logo swap ---------- */
+  .logo-dark { display: block; }
+  .logo-light { display: none; }
+  html[data-theme="dark"] .logo-dark { display: none; }
+  html[data-theme="dark"] .logo-light { display: block; }
+
   /* ---------- Header ---------- */
   header.site-header {
     position: sticky;
@@ -76,6 +105,7 @@
     height: 64px;
     background: var(--white);
     border-bottom: 1px solid var(--line);
+    transition: background var(--ease), border-color var(--ease);
   }
 
   .header-row {
@@ -83,6 +113,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
   }
 
   .brand {
@@ -98,6 +129,36 @@
     letter-spacing: -0.02em;
     font-size: 16px;
   }
+
+  .header-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    cursor: pointer;
+    transition: transform var(--ease), background var(--ease), border-color var(--ease);
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover { transform: translateY(-1px); }
+  .theme-toggle svg {
+    width: 16px;
+    height: 16px;
+  }
+  .theme-toggle .icon-moon { display: block; }
+  .theme-toggle .icon-sun { display: none; }
+  html[data-theme="dark"] .theme-toggle .icon-moon { display: none; }
+  html[data-theme="dark"] .theme-toggle .icon-sun { display: block; }
 
   .btn {
     display: inline-flex;
@@ -168,30 +229,95 @@
     box-shadow: 0 16px 40px -20px rgba(17,17,17,0.18);
     text-align: left;
     position: relative;
+    transition: background var(--ease), border-color var(--ease);
   }
 
   .state-stage {
-    position: relative;
-    min-height: 320px;
+    display: grid;
   }
 
   .state-block {
-    display: none;
+    grid-area: 1 / 1;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: opacity 180ms ease, transform 180ms ease, visibility 0s linear 180ms;
   }
   .state-block.is-active {
-    display: block;
-  }
-  .state-block.is-leaving {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  .state-block {
     opacity: 1;
-    transform: translateY(0);
-    transition: opacity 180ms ease, transform 180ms ease;
+    visibility: visible;
+    transform: none;
+    transition: opacity 180ms ease, transform 180ms ease, visibility 0s;
   }
 
   /* STATE A — form */
+  .mode-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .mode-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--meta);
+    text-transform: uppercase;
+    transition: color var(--ease);
+  }
+  .mode-label.is-active {
+    color: var(--ink);
+  }
+
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 22px;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+  .switch input {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    cursor: pointer;
+  }
+  .switch-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--line);
+    border-radius: 999px;
+    transition: background var(--ease);
+    pointer-events: none;
+  }
+  .switch-slider::before {
+    content: "";
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    top: 3px;
+    background: var(--white);
+    border-radius: 50%;
+    transition: transform var(--ease);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+  }
+  .switch input:checked + .switch-slider {
+    background: var(--ink);
+  }
+  .switch input:checked + .switch-slider::before {
+    transform: translateX(16px);
+  }
+  .switch input:focus-visible + .switch-slider {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
   .field-group {
     margin-bottom: 16px;
   }
@@ -213,7 +339,7 @@
     border: 1px solid var(--line);
     border-radius: var(--radius-input);
     outline: none;
-    transition: border-color var(--ease);
+    transition: border-color var(--ease), background var(--ease), color var(--ease);
   }
   input.field-input:focus {
     border-color: var(--ink);
@@ -236,6 +362,7 @@
     border-radius: var(--radius-input);
     padding: 12px 14px;
     background: var(--white);
+    transition: background var(--ease), border-color var(--ease);
   }
   details.wage-details summary {
     cursor: pointer;
@@ -401,6 +528,7 @@
     border-radius: var(--radius-input);
     padding: 16px;
     margin-bottom: 24px;
+    transition: background var(--ease), border-color var(--ease);
   }
   .breakdown-row {
     display: flex;
@@ -436,10 +564,17 @@
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    transition: border-color var(--ease);
   }
   .stat-strip.is-visible { display: flex; }
   .stat-strip strong { color: var(--ink); font-weight: 600; }
-  .stat-clear {
+  .stat-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+  .stat-link {
     font-size: 13px;
     font-weight: 600;
     color: var(--ink);
@@ -448,6 +583,174 @@
     cursor: pointer;
     padding: 0;
     text-decoration: underline;
+    white-space: nowrap;
+  }
+
+  /* ---------- Toasts ---------- */
+  .toast-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 300;
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 10px;
+    max-width: calc(100vw - 40px);
+  }
+  .toast {
+    background: var(--ink);
+    color: var(--white);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 12px 16px;
+    border-radius: var(--radius-input);
+    box-shadow: 0 16px 40px -16px rgba(0,0,0,0.4);
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 200ms ease, transform 200ms ease;
+    max-width: 300px;
+  }
+  .toast.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* ---------- History modal ---------- */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    z-index: 250;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 180ms ease, visibility 0s linear 180ms;
+  }
+  .modal-overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 180ms ease, visibility 0s;
+  }
+
+  .modal-box {
+    background: var(--white);
+    border-radius: 16px;
+    max-width: 400px;
+    width: 100%;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,0.4);
+    transform: translateY(10px);
+    transition: transform 180ms ease;
+  }
+  .modal-overlay.is-open .modal-box {
+    transform: none;
+  }
+
+  .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--line);
+    flex-shrink: 0;
+  }
+  .modal-header h2 {
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: transparent;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform var(--ease), background var(--ease);
+  }
+  .modal-close:hover { transform: translateY(-1px); }
+  .modal-close svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .modal-body {
+    padding: 4px 20px 16px;
+    overflow-y: auto;
+  }
+
+  .history-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .history-row:last-child {
+    border-bottom: none;
+  }
+  .history-info {
+    min-width: 0;
+  }
+  .history-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .history-item-price {
+    font-size: 12px;
+    color: var(--meta);
+    margin-top: 2px;
+  }
+  .history-badge {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 20px;
+  }
+  .history-badge.approved {
+    background: var(--ink);
+    color: var(--white);
+  }
+  .history-badge.denied {
+    background: transparent;
+    color: var(--meta);
+    border: 1px solid var(--line);
+  }
+  .history-empty {
+    font-size: 13px;
+    color: var(--meta);
+    text-align: center;
+    padding: 24px 0;
+  }
+
+  /* ---------- noscript fallback ---------- */
+  .noscript-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 24px;
+    text-align: center;
+    font-size: 14px;
+    color: var(--meta);
   }
 
   /* ---------- How it works ---------- */
@@ -469,12 +772,17 @@
   .how-cell {
     background: var(--white);
     padding: 36px 28px;
+    transition: background var(--ease);
   }
 
   .how-icon {
     width: 40px;
     height: 40px;
     margin-bottom: 20px;
+    color: var(--ink);
+  }
+  .how-icon .fill-ink {
+    fill: var(--ink);
   }
 
   h2.how-title {
@@ -504,6 +812,7 @@
     background: var(--ink);
     color: var(--white);
     padding: 40px 0;
+    transition: background var(--ease);
   }
 
   .footer-row {
@@ -522,7 +831,7 @@
 
   .footer-line {
     font-size: 13px;
-    color: rgba(255,255,255,0.65);
+    opacity: 0.65;
   }
 
   @media (max-width: 760px) {
@@ -545,10 +854,22 @@
 <header class="site-header">
   <div class="col header-row">
     <a href="/" aria-label="Buryit home" class="brand">
-      <img src="/logo-dark.png" alt="Buryit" width="32" height="32" style="display:block">
+      <img class="logo-dark" src="/logo-dark.png" alt="Buryit" width="32" height="32">
+      <img class="logo-light" src="/logo-light.png" alt="Buryit" width="32" height="32">
       <span class="brand-name">Buryit</span>
     </a>
-    <button type="button" class="btn btn-outline" id="launchAppBtn">Launch App</button>
+    <div class="header-actions">
+      <button type="button" class="theme-toggle" id="themeToggleBtn" aria-label="Switch to dark mode">
+        <svg class="icon-moon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M13.5 9.3A6 6 0 0 1 6.7 2.5a6 6 0 1 0 6.8 6.8Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <svg class="icon-sun" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <circle cx="8" cy="8" r="3.2" stroke="currentColor" stroke-width="1.4"/>
+          <path d="M8 1.2V3M8 13v1.8M14.8 8H13M3 8H1.2M12.7 3.3l-1.3 1.3M4.6 11.4l-1.3 1.3M12.7 12.7l-1.3-1.3M4.6 4.6 3.3 3.3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button type="button" class="btn btn-outline" id="launchAppBtn">Launch App</button>
+    </div>
   </div>
 </header>
 
@@ -560,11 +881,23 @@
 
       <div class="card-wrap" id="toolCard">
         <div class="tool-card">
+          <noscript>
+            <div class="noscript-card">Enable JavaScript to run the friction test.</div>
+          </noscript>
           <div class="state-stage">
 
             <!-- STATE A — Intro -->
             <div class="state-block is-active" id="stateIntro">
               <h2 class="visually-hidden">Analyze a purchase</h2>
+
+              <div class="mode-toggle-row">
+                <span class="mode-label is-active" id="modeLabelUsd">USD</span>
+                <label class="switch">
+                  <input type="checkbox" id="modeToggleInput" aria-label="Calculate in hours instead of USD">
+                  <span class="switch-slider" aria-hidden="true"></span>
+                </label>
+                <span class="mode-label" id="modeLabelHours">Hours</span>
+              </div>
 
               <div class="field-group">
                 <label class="field-label" for="itemNameInput">What are you analyzing?</label>
@@ -573,12 +906,12 @@
               </div>
 
               <div class="field-group">
-                <label class="field-label" for="priceInput">Price (USD)</label>
+                <label class="field-label" for="priceInput" id="priceLabel">Price (USD)</label>
                 <input type="number" id="priceInput" class="field-input" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
                 <p class="field-error" id="priceError" aria-live="polite"></p>
               </div>
 
-              <details class="wage-details">
+              <details class="wage-details" id="wageDetails">
                 <summary>Add your hourly wage (optional)</summary>
                 <div class="wage-input-wrap">
                   <label class="field-label" for="wageInput">Hourly wage (USD)</label>
@@ -620,12 +953,12 @@
             <div class="state-block" id="stateVerdict">
               <div class="verdict-center">
                 <svg class="verdict-icon" id="verdictIconApproved" viewBox="0 0 56 56" fill="none" aria-hidden="true" hidden>
-                  <circle cx="28" cy="28" r="27" fill="#111111"/>
-                  <path d="M17 29L24 36L39 20" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle class="fill-ink" cx="28" cy="28" r="27"/>
+                  <path d="M17 29L24 36L39 20" stroke="var(--white)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
                 <svg class="verdict-icon" id="verdictIconDenied" viewBox="0 0 56 56" fill="none" aria-hidden="true" hidden>
-                  <circle cx="28" cy="28" r="27" fill="#111111"/>
-                  <path d="M20 20L36 36M36 20L20 36" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                  <circle class="fill-ink" cx="28" cy="28" r="27"/>
+                  <path d="M20 20L36 36M36 20L20 36" stroke="var(--white)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
 
                 <h2 class="verdict-title" id="verdictTitle">VERDICT</h2>
@@ -637,7 +970,7 @@
                     <dd id="breakdownItem"></dd>
                   </div>
                   <div class="breakdown-row">
-                    <dt>Price</dt>
+                    <dt id="breakdownPriceLabel">Price</dt>
                     <dd id="breakdownPrice"></dd>
                   </div>
                   <div class="breakdown-row">
@@ -662,7 +995,10 @@
 
         <div class="stat-strip" id="statStrip">
           <span id="statStripText"></span>
-          <button type="button" class="stat-clear" id="statClearBtn">Clear</button>
+          <div class="stat-actions">
+            <button type="button" class="stat-link" id="viewHistoryBtn">View History</button>
+            <button type="button" class="stat-link" id="statClearBtn">Clear</button>
+          </div>
         </div>
       </div>
     </div>
@@ -674,30 +1010,30 @@
       <div class="how-grid">
         <div class="how-cell">
           <svg class="how-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <circle cx="8" cy="8" r="3.5" fill="#111111"/>
-            <circle cx="33" cy="14" r="3.5" fill="#111111"/>
-            <circle cx="12" cy="32" r="3.5" fill="#111111"/>
-            <path d="M11 10L29 13.5" stroke="#86868B" stroke-width="1.3"/>
-            <path d="M10 11.5L12 29" stroke="#86868B" stroke-width="1.3"/>
-            <path d="M14.5 30.5L30.5 16" stroke="#86868B" stroke-width="1.3"/>
+            <circle class="fill-ink" cx="8" cy="8" r="3.5"/>
+            <circle class="fill-ink" cx="33" cy="14" r="3.5"/>
+            <circle class="fill-ink" cx="12" cy="32" r="3.5"/>
+            <path d="M11 10L29 13.5" stroke="var(--meta)" stroke-width="1.3"/>
+            <path d="M10 11.5L12 29" stroke="var(--meta)" stroke-width="1.3"/>
+            <path d="M14.5 30.5L30.5 16" stroke="var(--meta)" stroke-width="1.3"/>
           </svg>
           <h3 class="how-cell-title">Algorithmic Logic</h3>
           <p class="how-cell-desc">Four weighted questions, scored instantly.</p>
         </div>
         <div class="how-cell">
           <svg class="how-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <path d="M20 3L34 8V18C34 27 28 33.5 20 37C12 33.5 6 27 6 18V8L20 3Z" stroke="#111111" stroke-width="1.6" stroke-linejoin="round"/>
-            <rect x="15" y="18" width="10" height="8" rx="1.5" stroke="#111111" stroke-width="1.6"/>
-            <path d="M17 18V15C17 13.3 18.3 12 20 12C21.7 12 23 13.3 23 15V18" stroke="#111111" stroke-width="1.6"/>
+            <path d="M20 3L34 8V18C34 27 28 33.5 20 37C12 33.5 6 27 6 18V8L20 3Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/>
+            <rect x="15" y="18" width="10" height="8" rx="1.5" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M17 18V15C17 13.3 18.3 12 20 12C21.7 12 23 13.3 23 15V18" stroke="currentColor" stroke-width="1.6"/>
           </svg>
           <h3 class="how-cell-title">Friction Pointing</h3>
           <p class="how-cell-desc">A forced pause before the checkout page.</p>
         </div>
         <div class="how-cell">
           <svg class="how-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-            <rect x="4" y="10" width="32" height="22" rx="4" stroke="#111111" stroke-width="1.6"/>
-            <path d="M4 16H36" stroke="#111111" stroke-width="1.6"/>
-            <circle cx="28" cy="24" r="3.5" stroke="#111111" stroke-width="1.6"/>
+            <rect x="4" y="10" width="32" height="22" rx="4" stroke="currentColor" stroke-width="1.6"/>
+            <path d="M4 16H36" stroke="currentColor" stroke-width="1.6"/>
+            <circle cx="28" cy="24" r="3.5" stroke="currentColor" stroke-width="1.6"/>
           </svg>
           <h3 class="how-cell-title">Wallet Protection</h3>
           <p class="how-cell-desc">Track what you didn't spend. Watch it add up.</p>
@@ -710,42 +1046,70 @@
 <footer class="site-footer">
   <div class="col footer-row">
     <div class="footer-brand">
-      <img src="/logo-light.png" width="24" height="24" alt="Buryit">
+      <img class="logo-dark" src="/logo-dark.png" width="24" height="24" alt="Buryit">
+      <img class="logo-light" src="/logo-light.png" width="24" height="24" alt="Buryit">
     </div>
     <p class="footer-line">Not financial advice. Just friction.</p>
     <p class="footer-line" id="copyrightLine"></p>
   </div>
 </footer>
 
+<!-- History modal -->
+<div class="modal-overlay" id="historyOverlay" hidden>
+  <div class="modal-box" id="historyModal" role="dialog" aria-modal="true" aria-labelledby="historyModalTitle">
+    <div class="modal-header">
+      <h2 id="historyModalTitle">Recent checks</h2>
+      <button type="button" class="modal-close" id="historyCloseBtn" aria-label="Close history">
+        <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+    <div class="modal-body" id="historyModalBody"></div>
+  </div>
+</div>
+
+<!-- Toasts -->
+<div class="toast-container" id="toastContainer" role="status" aria-live="polite"></div>
+
 <script>
 (function () {
   'use strict';
 
   // ───────────────────────────────────────────────
-  // Supabase — wired but inert
+  // Backend config — wired but inert
   // ───────────────────────────────────────────────
-  const SUPABASE_URL = 'PASTE_URL';
-  const SUPABASE_ANON_KEY = 'PASTE_ANON_KEY';
-  const SUPABASE_ENABLED = !SUPABASE_URL.startsWith('PASTE');
+  const CONFIG = {
+    supabaseUrl: 'PASTE_SUPABASE_URL_HERE',
+    supabaseAnonKey: 'PASTE_SUPABASE_ANON_KEY_HERE',
+    // analyticsUrl: 'PASTE_ANALYTICS_URL',
+    // apiBaseUrl: 'PASTE_API_BASE_URL',
+  };
+  const SUPABASE_ENABLED = !CONFIG.supabaseUrl.startsWith('PASTE');
 
   let _supabaseClient = null;
 
   async function getSupabaseClient() {
     if (_supabaseClient) return _supabaseClient;
     const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
-    _supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    _supabaseClient = createClient(CONFIG.supabaseUrl, CONFIG.supabaseAnonKey);
     return _supabaseClient;
   }
 
   async function saveAnalysis({ itemName, price, score, verdict, answers, wageHours }) {
-    if (!SUPABASE_ENABLED) return;
+    if (!SUPABASE_ENABLED) {
+      console.info('[Buryit] Supabase not configured, skipping save.');
+      return;
+    }
     try {
       const supabase = await getSupabaseClient();
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        await supabase.auth.signInAnonymously();
+      let user = session ? session.user : null;
+      if (!user) {
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error) throw error;
+        user = data.user;
       }
-      const { data: { user } } = await supabase.auth.getUser();
       await supabase.from('analyses').insert({
         user_id: user.id,
         item_name: itemName,
@@ -763,12 +1127,19 @@
   // ───────────────────────────────────────────────
   // DOM refs
   // ───────────────────────────────────────────────
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
   const launchAppBtn = document.getElementById('launchAppBtn');
   const toolCard = document.getElementById('toolCard');
 
   const stateIntro = document.getElementById('stateIntro');
   const stateQuiz = document.getElementById('stateQuiz');
   const stateVerdict = document.getElementById('stateVerdict');
+
+  const modeToggleInput = document.getElementById('modeToggleInput');
+  const modeLabelUsd = document.getElementById('modeLabelUsd');
+  const modeLabelHours = document.getElementById('modeLabelHours');
+  const priceLabel = document.getElementById('priceLabel');
+  const wageDetails = document.getElementById('wageDetails');
 
   const itemNameInput = document.getElementById('itemNameInput');
   const priceInput = document.getElementById('priceInput');
@@ -789,6 +1160,7 @@
   const verdictTitle = document.getElementById('verdictTitle');
   const verdictBody = document.getElementById('verdictBody');
   const breakdownItem = document.getElementById('breakdownItem');
+  const breakdownPriceLabel = document.getElementById('breakdownPriceLabel');
   const breakdownPrice = document.getElementById('breakdownPrice');
   const breakdownScore = document.getElementById('breakdownScore');
   const breakdownHoursRow = document.getElementById('breakdownHoursRow');
@@ -799,8 +1171,60 @@
   const statStrip = document.getElementById('statStrip');
   const statStripText = document.getElementById('statStripText');
   const statClearBtn = document.getElementById('statClearBtn');
+  const viewHistoryBtn = document.getElementById('viewHistoryBtn');
+
+  const historyOverlay = document.getElementById('historyOverlay');
+  const historyModal = document.getElementById('historyModal');
+  const historyModalBody = document.getElementById('historyModalBody');
+  const historyCloseBtn = document.getElementById('historyCloseBtn');
+
+  const toastContainer = document.getElementById('toastContainer');
 
   const copyrightLine = document.getElementById('copyrightLine');
+
+  // ───────────────────────────────────────────────
+  // Theme toggle
+  // ───────────────────────────────────────────────
+  function currentTheme() {
+    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  }
+
+  function updateThemeToggleLabel() {
+    const theme = currentTheme();
+    themeToggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+  }
+
+  themeToggleBtn.addEventListener('click', () => {
+    const next = currentTheme() === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('buryit.theme', next); } catch (err) { /* noop */ }
+    updateThemeToggleLabel();
+  });
+
+  updateThemeToggleLabel();
+
+  // ───────────────────────────────────────────────
+  // Toasts
+  // ───────────────────────────────────────────────
+  function showToast(message) {
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    toast.textContent = message;
+    toastContainer.appendChild(toast);
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        toast.classList.add('is-visible');
+      });
+    });
+
+    setTimeout(() => {
+      toast.classList.remove('is-visible');
+      setTimeout(() => {
+        if (toast.parentNode) toast.parentNode.removeChild(toast);
+      }, 220);
+    }, 3000);
+  }
 
   // ───────────────────────────────────────────────
   // State
@@ -812,12 +1236,14 @@
     { text: 'Did you see this advertised somewhere in the last 48 hours?', yes: -1, no: 1 }
   ];
 
+  let calcMode = 'usd'; // 'usd' | 'hours'
   let currentItemName = '';
   let currentPrice = 0;
   let currentWage = null;
   let currentQ = 0;
   let score = 0;
   let answers = { q1: null, q2: null, q3: null, q4: null };
+  let transitionLock = false;
 
   // ───────────────────────────────────────────────
   // Helpers
@@ -830,6 +1256,45 @@
     return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
+  function formatHours(n) {
+    return n.toLocaleString('en-US', { maximumFractionDigits: 2 });
+  }
+
+  function parsePrice(raw) {
+    const trimmed = (raw ?? '').trim();
+    return trimmed === '' ? NaN : Number(trimmed);
+  }
+
+  // ───────────────────────────────────────────────
+  // Mode toggle (USD vs Hours)
+  // ───────────────────────────────────────────────
+  function applyModeUI() {
+    const isHours = calcMode === 'hours';
+    modeLabelUsd.classList.toggle('is-active', !isHours);
+    modeLabelHours.classList.toggle('is-active', isHours);
+    priceLabel.textContent = isHours ? 'How many hours does this cost?' : 'Price (USD)';
+    priceInput.placeholder = isHours ? 'e.g. 3.5' : '0.00';
+    wageDetails.hidden = isHours;
+  }
+
+  modeToggleInput.addEventListener('change', () => {
+    calcMode = modeToggleInput.checked ? 'hours' : 'usd';
+    clearErrors();
+    applyModeUI();
+    checkFieldsLive();
+  });
+
+  function resetMode() {
+    calcMode = 'usd';
+    modeToggleInput.checked = false;
+    applyModeUI();
+  }
+
+  applyModeUI();
+
+  // ───────────────────────────────────────────────
+  // Validation
+  // ───────────────────────────────────────────────
   function clearErrors() {
     itemNameError.textContent = '';
     priceError.textContent = '';
@@ -838,8 +1303,7 @@
   function validateForm() {
     clearErrors();
     const name = collapseWhitespace(itemNameInput.value);
-    const priceRaw = priceInput.value;
-    const price = Number.parseFloat(priceRaw);
+    const price = parsePrice(priceInput.value);
 
     let valid = true;
 
@@ -848,11 +1312,11 @@
       valid = false;
     }
 
-    if (priceRaw === '' || !Number.isFinite(price) || price < 0) {
-      priceError.textContent = 'Enter a valid price.';
+    if (!Number.isFinite(price) || price < 0) {
+      priceError.textContent = calcMode === 'hours' ? 'Enter a valid number of hours.' : 'Enter a valid price.';
       valid = false;
     } else if (price > 1000000) {
-      priceError.textContent = 'Price must be 1,000,000 or less.';
+      priceError.textContent = calcMode === 'hours' ? 'Hours must be 1,000,000 or less.' : 'Price must be 1,000,000 or less.';
       valid = false;
     }
 
@@ -861,9 +1325,9 @@
 
   function checkFieldsLive() {
     const name = collapseWhitespace(itemNameInput.value);
-    const price = Number.parseFloat(priceInput.value);
+    const price = parsePrice(priceInput.value);
     const nameOk = name.length > 0;
-    const priceOk = priceInput.value !== '' && Number.isFinite(price) && price >= 0 && price <= 1000000;
+    const priceOk = Number.isFinite(price) && price >= 0 && price <= 1000000;
     analyzeBtn.disabled = !(nameOk && priceOk);
   }
 
@@ -875,8 +1339,16 @@
     showEl.classList.add('is-active');
   }
 
+  function focusAfterTransition(el) {
+    setTimeout(() => { el.focus(); }, 200);
+  }
+
+  function prefersReducedMotion() {
+    return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
   function scrollToTool() {
-    toolCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    toolCard.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
   }
 
   launchAppBtn.addEventListener('click', scrollToTool);
@@ -888,20 +1360,26 @@
     if (!validateForm()) return;
 
     currentItemName = collapseWhitespace(itemNameInput.value);
-    currentPrice = Number.parseFloat(priceInput.value);
-    const wageRaw = wageInput.value;
-    currentWage = (wageRaw !== '' && Number.isFinite(Number.parseFloat(wageRaw)) && Number.parseFloat(wageRaw) > 0)
-      ? Number.parseFloat(wageRaw)
-      : null;
+    currentPrice = parsePrice(priceInput.value);
+
+    if (calcMode === 'hours') {
+      currentWage = null;
+    } else {
+      const wageParsed = parsePrice(wageInput.value);
+      currentWage = (Number.isFinite(wageParsed) && wageParsed > 0) ? wageParsed : null;
+    }
 
     currentQ = 0;
     score = 0;
     answers = { q1: null, q2: null, q3: null, q4: null };
 
-    quizHeaderLine.textContent = 'Analyzing: ' + currentItemName + ' ($' + formatMoney(currentPrice) + ')';
+    quizHeaderLine.textContent = calcMode === 'hours'
+      ? 'Analyzing: ' + currentItemName + ' (' + formatHours(currentPrice) + ' hrs)'
+      : 'Analyzing: ' + currentItemName + ' ($' + formatMoney(currentPrice) + ')';
 
     switchState(stateIntro, stateQuiz);
     renderQuestion();
+    focusAfterTransition(yesBtn);
   });
 
   // ───────────────────────────────────────────────
@@ -916,6 +1394,9 @@
   }
 
   function handleAnswer(isYes) {
+    if (transitionLock) return;
+    transitionLock = true;
+
     const q = QUESTIONS[currentQ];
     score += isYes ? q.yes : q.no;
     answers['q' + (currentQ + 1)] = isYes;
@@ -927,10 +1408,13 @@
       if (currentQ < QUESTIONS.length) {
         renderQuestion();
         questionText.classList.remove('is-leaving');
+        transitionLock = false;
       } else {
         Array.from(progressRow.children).forEach(seg => seg.classList.add('filled'));
         switchState(stateQuiz, stateVerdict);
         renderVerdict();
+        focusAfterTransition(resetBtn);
+        transitionLock = false;
       }
     }, 160);
   }
@@ -939,9 +1423,14 @@
   noBtn.addEventListener('click', () => handleAnswer(false));
 
   document.addEventListener('keydown', (e) => {
+    if (isHistoryModalOpen()) {
+      if (e.key === 'Escape') closeHistoryModal();
+      return;
+    }
     if (!stateQuiz.classList.contains('is-active')) return;
+    if (transitionLock) return;
     const tag = document.activeElement && document.activeElement.tagName;
-    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return;
 
     if (e.key === 'Enter' || e.key.toLowerCase() === 'y') {
       handleAnswer(true);
@@ -953,9 +1442,13 @@
   // ───────────────────────────────────────────────
   // STATE C — verdict
   // ───────────────────────────────────────────────
+  let lastLifeCostHours = null;
+
   function renderVerdict() {
     const approved = score > 0;
-    const verdictLabel = approved ? 'Approved' : 'Denied';
+    const verdictLabelLocal = approved ? 'Approved' : 'Denied';
+    const verdictLabelDb = approved ? 'approved' : 'denied';
+    const isHours = calcMode === 'hours';
 
     verdictIconApproved.hidden = !approved;
     verdictIconDenied.hidden = approved;
@@ -966,25 +1459,38 @@
       : 'This is an impulse buy. Walk away and save your money.';
 
     breakdownItem.textContent = currentItemName;
-    breakdownPrice.textContent = '$' + formatMoney(currentPrice);
+    breakdownPriceLabel.textContent = isHours ? 'Hours' : 'Price';
+    breakdownPrice.textContent = isHours ? formatHours(currentPrice) + ' hrs' : '$' + formatMoney(currentPrice);
     breakdownScore.textContent = 'Score ' + score + ' of 4';
 
-    if (currentWage && currentWage > 0) {
-      const hours = (currentPrice / currentWage).toFixed(1);
-      breakdownHours.textContent = 'That’s ' + hours + ' hours of your life.';
+    let wageHoursPayload = null;
+    let lifeCostHours = null;
+
+    if (isHours) {
+      lifeCostHours = currentPrice;
+      wageHoursPayload = +currentPrice.toFixed(2);
+    } else if (currentWage && currentWage > 0) {
+      lifeCostHours = currentPrice / currentWage;
+      wageHoursPayload = +lifeCostHours.toFixed(2);
+    }
+
+    if (lifeCostHours !== null) {
+      breakdownHours.textContent = 'That’s ' + lifeCostHours.toFixed(1) + ' hours of your life.';
       breakdownHoursRow.hidden = false;
     } else {
       breakdownHoursRow.hidden = true;
     }
 
-    recordHistory(verdictLabel);
+    lastLifeCostHours = lifeCostHours;
+
+    recordHistory(verdictLabelLocal);
     saveAnalysis({
       itemName: currentItemName,
-      price: currentPrice,
+      price: isHours ? 0 : currentPrice,
       score: score,
-      verdict: verdictLabel,
+      verdict: verdictLabelDb,
       answers: answers,
-      wageHours: currentWage
+      wageHours: wageHoursPayload
     });
   }
 
@@ -993,24 +1499,24 @@
   // ───────────────────────────────────────────────
   copyResultBtn.addEventListener('click', async () => {
     const approved = score > 0;
+    const isHours = calcMode === 'hours';
     const lines = [
       'Buryit verdict: ' + (approved ? 'APPROVED' : 'DENIED'),
       'Item: ' + currentItemName,
-      'Price: $' + formatMoney(currentPrice),
+      isHours ? 'Hours: ' + formatHours(currentPrice) : 'Price: $' + formatMoney(currentPrice),
       'Score: ' + score + ' of 4'
     ];
-    if (currentWage && currentWage > 0) {
-      lines.push('Life cost: ' + (currentPrice / currentWage).toFixed(1) + ' hours');
+    if (!isHours && lastLifeCostHours !== null) {
+      lines.push('Life cost: ' + lastLifeCostHours.toFixed(1) + ' hours');
     }
     const summary = lines.join('\n');
 
     try {
       await navigator.clipboard.writeText(summary);
-      const original = copyResultBtn.textContent;
-      copyResultBtn.textContent = 'Copied ✓';
-      setTimeout(() => { copyResultBtn.textContent = original; }, 1500);
+      showToast('Copied to clipboard');
     } catch (err) {
       console.warn('[Buryit] clipboard write failed', err);
+      showToast('Failed to copy');
     }
   });
 
@@ -1022,8 +1528,10 @@
     priceInput.value = '';
     wageInput.value = '';
     clearErrors();
+    resetMode();
     checkFieldsLive();
     switchState(stateVerdict, stateIntro);
+    focusAfterTransition(itemNameInput);
   });
 
   // ───────────────────────────────────────────────
@@ -1055,6 +1563,7 @@
       history.unshift({
         itemName: currentItemName,
         price: currentPrice,
+        mode: calcMode,
         verdict: verdictLabel,
         score: score,
         at: new Date().toISOString()
@@ -1102,8 +1611,6 @@
   }
 
   statClearBtn.addEventListener('click', () => {
-    const ok = confirm('Clear your Buryit history? This can’t be undone.');
-    if (!ok) return;
     try {
       localStorage.removeItem(HISTORY_KEY);
       localStorage.removeItem(DENIED_TOTAL_KEY);
@@ -1111,6 +1618,109 @@
       console.warn('[Buryit] clear failed', err);
     }
     renderStatStrip();
+    showToast('History cleared');
+  });
+
+  // ───────────────────────────────────────────────
+  // History modal
+  // ───────────────────────────────────────────────
+  let lastFocusedBeforeModal = null;
+
+  function isHistoryModalOpen() {
+    return historyOverlay.classList.contains('is-open');
+  }
+
+  function renderHistoryModalBody() {
+    const history = readHistory().slice(0, 10);
+    historyModalBody.innerHTML = '';
+
+    if (history.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'history-empty';
+      empty.textContent = 'No checks yet.';
+      historyModalBody.appendChild(empty);
+      return;
+    }
+
+    history.forEach((entry) => {
+      const row = document.createElement('div');
+      row.className = 'history-row';
+
+      const info = document.createElement('div');
+      info.className = 'history-info';
+
+      const name = document.createElement('div');
+      name.className = 'history-item-name';
+      name.textContent = entry.itemName || 'Untitled';
+
+      const priceLine = document.createElement('div');
+      priceLine.className = 'history-item-price';
+      const priceNum = Number(entry.price);
+      priceLine.textContent = entry.mode === 'hours'
+        ? formatHours(Number.isFinite(priceNum) ? priceNum : 0) + ' hrs'
+        : '$' + formatMoney(Number.isFinite(priceNum) ? priceNum : 0);
+
+      info.appendChild(name);
+      info.appendChild(priceLine);
+
+      const badge = document.createElement('span');
+      const approved = entry.verdict === 'Approved';
+      badge.className = 'history-badge ' + (approved ? 'approved' : 'denied');
+      badge.textContent = approved ? 'Approved' : 'Denied';
+
+      row.appendChild(info);
+      row.appendChild(badge);
+      historyModalBody.appendChild(row);
+    });
+  }
+
+  function getFocusableInModal() {
+    return Array.from(historyModal.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'))
+      .filter(el => !el.disabled && el.offsetParent !== null);
+  }
+
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+    const focusable = getFocusableInModal();
+    if (focusable.length === 0) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
+  }
+
+  function openHistoryModal() {
+    lastFocusedBeforeModal = document.activeElement;
+    renderHistoryModalBody();
+    historyOverlay.hidden = false;
+    requestAnimationFrame(() => {
+      historyOverlay.classList.add('is-open');
+    });
+    historyModal.addEventListener('keydown', trapFocus);
+    setTimeout(() => { historyCloseBtn.focus(); }, 200);
+  }
+
+  function closeHistoryModal() {
+    historyOverlay.classList.remove('is-open');
+    historyModal.removeEventListener('keydown', trapFocus);
+    setTimeout(() => {
+      historyOverlay.hidden = true;
+      if (lastFocusedBeforeModal && typeof lastFocusedBeforeModal.focus === 'function') {
+        lastFocusedBeforeModal.focus();
+      }
+    }, 180);
+  }
+
+  viewHistoryBtn.addEventListener('click', openHistoryModal);
+  historyCloseBtn.addEventListener('click', closeHistoryModal);
+  historyOverlay.addEventListener('click', (e) => {
+    if (e.target === historyOverlay) closeHistoryModal();
   });
 
   // ───────────────────────────────────────────────
