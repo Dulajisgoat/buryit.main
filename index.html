@@ -91,11 +91,9 @@
     outline-offset: 2px;
   }
 
-  /* ---------- Logo swap ---------- */
-  .logo-dark { display: block; }
-  .logo-light { display: none; }
-  html[data-theme="dark"] .logo-dark { display: none; }
-  html[data-theme="dark"] .logo-light { display: block; }
+  /* ---------- Logo (single file, inverted in dark mode) ---------- */
+  .brand-logo { display: block; }
+  html[data-theme="dark"] .brand-logo { filter: invert(1); }
 
   /* ---------- Header ---------- */
   header.site-header {
@@ -854,8 +852,7 @@
 <header class="site-header">
   <div class="col header-row">
     <a href="/" aria-label="Buryit home" class="brand">
-      <img class="logo-dark" src="/logo-dark.png" alt="Buryit" width="32" height="32">
-      <img class="logo-light" src="/logo-light.png" alt="Buryit" width="32" height="32">
+      <img class="brand-logo" src="/logo.png" alt="Buryit" width="32" height="32">
       <span class="brand-name">Buryit</span>
     </a>
     <div class="header-actions">
@@ -1046,8 +1043,7 @@
 <footer class="site-footer">
   <div class="col footer-row">
     <div class="footer-brand">
-      <img class="logo-dark" src="/logo-dark.png" width="24" height="24" alt="Buryit">
-      <img class="logo-light" src="/logo-light.png" width="24" height="24" alt="Buryit">
+      <span class="brand-name">Buryit</span>
     </div>
     <p class="footer-line">Not financial advice. Just friction.</p>
     <p class="footer-line" id="copyrightLine"></p>
