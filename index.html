@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Buryit — Kill impulse buying</title>
+<meta name="description" content="A 4-question friction test that stops impulse buying before it hits your wallet.">
+<meta name="theme-color" content="#111111">
+<meta property="og:title" content="Buryit">
+<meta property="og:description" content="Kill impulse buying before it kills your wallet.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="/icon-mark.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --white: #FFFFFF;
+    --bg-secondary: #F5F5F7;
+    --ink: #111111;
+    --black: #000000;
+    --meta: #86868B;
+    --line: rgba(17,17,17,.08);
+    --radius-card: 14px;
+    --radius-input: 8px;
+    --ease: 150ms ease;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--white);
+    color: var(--ink);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px; height: 1px;
+    padding: 0; margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  a { color: inherit; }
+
+  .col {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  button, input {
+    font-family: inherit;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Header ---------- */
+  header.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    height: 64px;
+    background: var(--white);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .header-row {
+    height: 64px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .brand img { display: block; }
+
+  .brand-name {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-size: 16px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 9px 18px;
+    border-radius: var(--radius-input);
+    cursor: pointer;
+    border: 1px solid var(--ink);
+    transition: transform var(--ease), background var(--ease), color var(--ease), box-shadow var(--ease);
+    white-space: nowrap;
+    background: transparent;
+    color: var(--ink);
+  }
+
+  .btn-primary {
+    background: var(--ink);
+    color: var(--white);
+    border-color: var(--ink);
+  }
+  .btn-primary:hover { transform: translateY(-1px); }
+
+  .btn-outline:hover { transform: translateY(-1px); }
+
+  .btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+    transform: none;
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    padding: clamp(48px, 8vw, 96px) 0 clamp(32px, 6vw, 64px);
+    text-align: center;
+  }
+
+  h1.headline {
+    font-size: clamp(2rem, 5vw, 3.6rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.08;
+    max-width: 760px;
+    margin: 0 auto 16px;
+    color: var(--black);
+  }
+
+  .supporting-line {
+    font-size: clamp(15px, 2vw, 18px);
+    color: var(--meta);
+    max-width: 480px;
+    margin: 0 auto clamp(40px, 6vw, 64px);
+  }
+
+  /* ---------- Tool card ---------- */
+  .card-wrap {
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  .tool-card {
+    background: var(--bg-secondary);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: clamp(24px, 4vw, 32px);
+    box-shadow: 0 16px 40px -20px rgba(17,17,17,0.18);
+    text-align: left;
+    position: relative;
+  }
+
+  .state-stage {
+    position: relative;
+    min-height: 320px;
+  }
+
+  .state-block {
+    display: none;
+  }
+  .state-block.is-active {
+    display: block;
+  }
+  .state-block.is-leaving {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  .state-block {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 180ms ease, transform 180ms ease;
+  }
+
+  /* STATE A — form */
+  .field-group {
+    margin-bottom: 16px;
+  }
+
+  label.field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    letter-spacing: -0.005em;
+  }
+
+  input.field-input {
+    width: 100%;
+    font-size: 16px;
+    padding: 12px 14px;
+    color: var(--ink);
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-input);
+    outline: none;
+    transition: border-color var(--ease);
+  }
+  input.field-input:focus {
+    border-color: var(--ink);
+  }
+  input.field-input::placeholder {
+    color: var(--meta);
+  }
+
+  .field-error {
+    font-size: 13px;
+    color: var(--black);
+    margin-top: 6px;
+    min-height: 1.2em;
+    font-weight: 500;
+  }
+
+  details.wage-details {
+    margin: 4px 0 24px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-input);
+    padding: 12px 14px;
+    background: var(--white);
+  }
+  details.wage-details summary {
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    list-style: none;
+  }
+  details.wage-details summary::-webkit-details-marker { display: none; }
+  details.wage-details summary::before {
+    content: "+";
+    display: inline-block;
+    width: 14px;
+  }
+  details.wage-details[open] summary::before {
+    content: "–";
+  }
+  details.wage-details .wage-input-wrap {
+    margin-top: 12px;
+  }
+
+  button.analyze-btn {
+    width: 100%;
+    padding: 13px 20px;
+    font-size: 15px;
+    font-weight: 600;
+    background: var(--ink);
+    color: var(--white);
+    border: 1px solid var(--ink);
+    border-radius: var(--radius-input);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: transform var(--ease), background var(--ease);
+  }
+  button.analyze-btn:hover { transform: translateY(-1px); }
+  button.analyze-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .arrow-svg {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  /* STATE B — quiz */
+  .quiz-header-line {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--meta);
+    margin-bottom: 20px;
+  }
+
+  .progress-row {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+  .progress-seg {
+    flex: 1;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--line);
+    overflow: hidden;
+  }
+  .progress-seg span {
+    display: block;
+    height: 100%;
+    width: 0%;
+    background: var(--ink);
+    transition: width 200ms ease;
+  }
+  .progress-seg.filled span { width: 100%; }
+
+  .progress-text {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--meta);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 20px;
+  }
+
+  h2.question-text {
+    font-size: clamp(18px, 3vw, 22px);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.32;
+    margin: 0 0 32px;
+    min-height: 76px;
+    transition: opacity 160ms ease, transform 160ms ease;
+  }
+  h2.question-text.is-leaving {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+
+  .answer-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  button.answer-btn {
+    padding: 15px 12px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: var(--radius-input);
+    cursor: pointer;
+    transition: transform var(--ease), background var(--ease), color var(--ease);
+  }
+  button.answer-btn.yes {
+    background: var(--ink);
+    color: var(--white);
+    border: 1px solid var(--ink);
+  }
+  button.answer-btn.no {
+    background: transparent;
+    color: var(--ink);
+    border: 1px solid var(--ink);
+  }
+  button.answer-btn:hover { transform: translateY(-1px); }
+  button.answer-btn:active { transform: scale(0.98); }
+
+  /* STATE C — verdict */
+  .verdict-center {
+    text-align: center;
+    padding-top: 4px;
+  }
+
+  .verdict-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 20px;
+  }
+
+  h2.verdict-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--meta);
+    margin: 0 0 8px;
+  }
+
+  .verdict-body {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.4;
+    max-width: 340px;
+    margin: 0 auto 24px;
+  }
+
+  .verdict-breakdown {
+    text-align: left;
+    background: var(--white);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-input);
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+  .breakdown-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    padding: 4px 0;
+  }
+  .breakdown-row dt {
+    color: var(--meta);
+    font-weight: 500;
+  }
+  .breakdown-row dd {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .verdict-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  /* ---------- Stat strip ---------- */
+  .stat-strip {
+    max-width: 460px;
+    margin: 20px auto 0;
+    padding: 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-input);
+    font-size: 13px;
+    color: var(--meta);
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .stat-strip.is-visible { display: flex; }
+  .stat-strip strong { color: var(--ink); font-weight: 600; }
+  .stat-clear {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+  }
+
+  /* ---------- How it works ---------- */
+  .how-section {
+    padding: clamp(64px, 10vw, 120px) 0 clamp(48px, 8vw, 96px);
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    overflow: hidden;
+    margin-top: 48px;
+  }
+
+  .how-cell {
+    background: var(--white);
+    padding: 36px 28px;
+  }
+
+  .how-icon {
+    width: 40px;
+    height: 40px;
+    margin-bottom: 20px;
+  }
+
+  h2.how-title {
+    font-size: clamp(1.6rem, 3vw, 2.1rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    text-align: center;
+    margin: 0;
+  }
+
+  .how-cell-title {
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+
+  .how-cell-desc {
+    font-size: 14px;
+    color: var(--meta);
+    margin: 0;
+    line-height: 1.55;
+  }
+
+  /* ---------- Footer ---------- */
+  footer.site-footer {
+    background: var(--ink);
+    color: var(--white);
+    padding: 40px 0;
+  }
+
+  .footer-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .footer-brand {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .footer-line {
+    font-size: 13px;
+    color: rgba(255,255,255,0.65);
+  }
+
+  @media (max-width: 760px) {
+    .how-grid { grid-template-columns: 1fr; }
+    .verdict-actions { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="col header-row">
+    <a href="/" aria-label="Buryit home" class="brand">
+      <img src="/logo-dark.png" alt="Buryit" width="32" height="32" style="display:block">
+      <span class="brand-name">Buryit</span>
+    </a>
+    <button type="button" class="btn btn-outline" id="launchAppBtn">Launch App</button>
+  </div>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="col">
+      <h1 class="headline">Kill impulse buying before it kills your wallet.</h1>
+      <p class="supporting-line">Four questions. One honest verdict. Zero regrets.</p>
+
+      <div class="card-wrap" id="toolCard">
+        <div class="tool-card">
+          <div class="state-stage">
+
+            <!-- STATE A — Intro -->
+            <div class="state-block is-active" id="stateIntro">
+              <h2 class="visually-hidden">Analyze a purchase</h2>
+
+              <div class="field-group">
+                <label class="field-label" for="itemNameInput">What are you analyzing?</label>
+                <input type="text" id="itemNameInput" class="field-input" maxlength="60" placeholder="e.g. Noise-cancelling headphones" autocomplete="off">
+                <p class="field-error" id="itemNameError" aria-live="polite"></p>
+              </div>
+
+              <div class="field-group">
+                <label class="field-label" for="priceInput">Price (USD)</label>
+                <input type="number" id="priceInput" class="field-input" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+                <p class="field-error" id="priceError" aria-live="polite"></p>
+              </div>
+
+              <details class="wage-details">
+                <summary>Add your hourly wage (optional)</summary>
+                <div class="wage-input-wrap">
+                  <label class="field-label" for="wageInput">Hourly wage (USD)</label>
+                  <input type="number" id="wageInput" class="field-input" min="0" step="0.01" inputmode="decimal" placeholder="0.00">
+                </div>
+              </details>
+
+              <button type="button" class="analyze-btn" id="analyzeBtn" disabled>
+                Analyze Purchase
+                <svg class="arrow-svg" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                  <path d="M2 8H14M14 8L9 3M14 8L9 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+
+            <!-- STATE B — Quiz -->
+            <div class="state-block" id="stateQuiz">
+              <div class="quiz-header-line" id="quizHeaderLine"></div>
+
+              <div class="progress-row" id="progressRow">
+                <div class="progress-seg" data-seg="0"><span></span></div>
+                <div class="progress-seg" data-seg="1"><span></span></div>
+                <div class="progress-seg" data-seg="2"><span></span></div>
+                <div class="progress-seg" data-seg="3"><span></span></div>
+              </div>
+              <div class="progress-text" id="progressText">Question 1 of 4</div>
+
+              <div aria-live="polite">
+                <h2 class="question-text" id="questionText"></h2>
+              </div>
+
+              <div class="answer-row">
+                <button type="button" class="answer-btn yes" id="yesBtn">Yes</button>
+                <button type="button" class="answer-btn no" id="noBtn">No</button>
+              </div>
+            </div>
+
+            <!-- STATE C — Verdict -->
+            <div class="state-block" id="stateVerdict">
+              <div class="verdict-center">
+                <svg class="verdict-icon" id="verdictIconApproved" viewBox="0 0 56 56" fill="none" aria-hidden="true" hidden>
+                  <circle cx="28" cy="28" r="27" fill="#111111"/>
+                  <path d="M17 29L24 36L39 20" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <svg class="verdict-icon" id="verdictIconDenied" viewBox="0 0 56 56" fill="none" aria-hidden="true" hidden>
+                  <circle cx="28" cy="28" r="27" fill="#111111"/>
+                  <path d="M20 20L36 36M36 20L20 36" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+
+                <h2 class="verdict-title" id="verdictTitle">VERDICT</h2>
+                <p class="verdict-body" id="verdictBody"></p>
+
+                <dl class="verdict-breakdown">
+                  <div class="breakdown-row">
+                    <dt>Item</dt>
+                    <dd id="breakdownItem"></dd>
+                  </div>
+                  <div class="breakdown-row">
+                    <dt>Price</dt>
+                    <dd id="breakdownPrice"></dd>
+                  </div>
+                  <div class="breakdown-row">
+                    <dt>Score</dt>
+                    <dd id="breakdownScore"></dd>
+                  </div>
+                  <div class="breakdown-row" id="breakdownHoursRow" hidden>
+                    <dt>Life cost</dt>
+                    <dd id="breakdownHours"></dd>
+                  </div>
+                </dl>
+
+                <div class="verdict-actions">
+                  <button type="button" class="btn btn-primary" id="copyResultBtn">Copy result</button>
+                  <button type="button" class="btn btn-outline" id="resetBtn">Reset Analyzer</button>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="stat-strip" id="statStrip">
+          <span id="statStripText"></span>
+          <button type="button" class="stat-clear" id="statClearBtn">Clear</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how-section">
+    <div class="col">
+      <h2 class="how-title">How it works</h2>
+      <div class="how-grid">
+        <div class="how-cell">
+          <svg class="how-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <circle cx="8" cy="8" r="3.5" fill="#111111"/>
+            <circle cx="33" cy="14" r="3.5" fill="#111111"/>
+            <circle cx="12" cy="32" r="3.5" fill="#111111"/>
+            <path d="M11 10L29 13.5" stroke="#86868B" stroke-width="1.3"/>
+            <path d="M10 11.5L12 29" stroke="#86868B" stroke-width="1.3"/>
+            <path d="M14.5 30.5L30.5 16" stroke="#86868B" stroke-width="1.3"/>
+          </svg>
+          <h3 class="how-cell-title">Algorithmic Logic</h3>
+          <p class="how-cell-desc">Four weighted questions, scored instantly.</p>
+        </div>
+        <div class="how-cell">
+          <svg class="how-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <path d="M20 3L34 8V18C34 27 28 33.5 20 37C12 33.5 6 27 6 18V8L20 3Z" stroke="#111111" stroke-width="1.6" stroke-linejoin="round"/>
+            <rect x="15" y="18" width="10" height="8" rx="1.5" stroke="#111111" stroke-width="1.6"/>
+            <path d="M17 18V15C17 13.3 18.3 12 20 12C21.7 12 23 13.3 23 15V18" stroke="#111111" stroke-width="1.6"/>
+          </svg>
+          <h3 class="how-cell-title">Friction Pointing</h3>
+          <p class="how-cell-desc">A forced pause before the checkout page.</p>
+        </div>
+        <div class="how-cell">
+          <svg class="how-icon" viewBox="0 0 40 40" fill="none" aria-hidden="true">
+            <rect x="4" y="10" width="32" height="22" rx="4" stroke="#111111" stroke-width="1.6"/>
+            <path d="M4 16H36" stroke="#111111" stroke-width="1.6"/>
+            <circle cx="28" cy="24" r="3.5" stroke="#111111" stroke-width="1.6"/>
+          </svg>
+          <h3 class="how-cell-title">Wallet Protection</h3>
+          <p class="how-cell-desc">Track what you didn't spend. Watch it add up.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <div class="col footer-row">
+    <div class="footer-brand">
+      <img src="/logo-light.png" width="24" height="24" alt="Buryit">
+    </div>
+    <p class="footer-line">Not financial advice. Just friction.</p>
+    <p class="footer-line" id="copyrightLine"></p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ───────────────────────────────────────────────
+  // Supabase — wired but inert
+  // ───────────────────────────────────────────────
+  const SUPABASE_URL = 'PASTE_URL';
+  const SUPABASE_ANON_KEY = 'PASTE_ANON_KEY';
+  const SUPABASE_ENABLED = !SUPABASE_URL.startsWith('PASTE');
+
+  let _supabaseClient = null;
+
+  async function getSupabaseClient() {
+    if (_supabaseClient) return _supabaseClient;
+    const { createClient } = await import('https://esm.sh/@supabase/supabase-js@2');
+    _supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return _supabaseClient;
+  }
+
+  async function saveAnalysis({ itemName, price, score, verdict, answers, wageHours }) {
+    if (!SUPABASE_ENABLED) return;
+    try {
+      const supabase = await getSupabaseClient();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        await supabase.auth.signInAnonymously();
+      }
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from('analyses').insert({
+        user_id: user.id,
+        item_name: itemName,
+        price: price,
+        score: score,
+        verdict: verdict,
+        answers: answers,
+        wage_hours: wageHours ?? null
+      });
+    } catch (err) {
+      console.warn('[Buryit] save failed', err);
+    }
+  }
+
+  // ───────────────────────────────────────────────
+  // DOM refs
+  // ───────────────────────────────────────────────
+  const launchAppBtn = document.getElementById('launchAppBtn');
+  const toolCard = document.getElementById('toolCard');
+
+  const stateIntro = document.getElementById('stateIntro');
+  const stateQuiz = document.getElementById('stateQuiz');
+  const stateVerdict = document.getElementById('stateVerdict');
+
+  const itemNameInput = document.getElementById('itemNameInput');
+  const priceInput = document.getElementById('priceInput');
+  const wageInput = document.getElementById('wageInput');
+  const itemNameError = document.getElementById('itemNameError');
+  const priceError = document.getElementById('priceError');
+  const analyzeBtn = document.getElementById('analyzeBtn');
+
+  const quizHeaderLine = document.getElementById('quizHeaderLine');
+  const progressRow = document.getElementById('progressRow');
+  const progressText = document.getElementById('progressText');
+  const questionText = document.getElementById('questionText');
+  const yesBtn = document.getElementById('yesBtn');
+  const noBtn = document.getElementById('noBtn');
+
+  const verdictIconApproved = document.getElementById('verdictIconApproved');
+  const verdictIconDenied = document.getElementById('verdictIconDenied');
+  const verdictTitle = document.getElementById('verdictTitle');
+  const verdictBody = document.getElementById('verdictBody');
+  const breakdownItem = document.getElementById('breakdownItem');
+  const breakdownPrice = document.getElementById('breakdownPrice');
+  const breakdownScore = document.getElementById('breakdownScore');
+  const breakdownHoursRow = document.getElementById('breakdownHoursRow');
+  const breakdownHours = document.getElementById('breakdownHours');
+  const copyResultBtn = document.getElementById('copyResultBtn');
+  const resetBtn = document.getElementById('resetBtn');
+
+  const statStrip = document.getElementById('statStrip');
+  const statStripText = document.getElementById('statStripText');
+  const statClearBtn = document.getElementById('statClearBtn');
+
+  const copyrightLine = document.getElementById('copyrightLine');
+
+  // ───────────────────────────────────────────────
+  // State
+  // ───────────────────────────────────────────────
+  const QUESTIONS = [
+    { text: 'Will you use this at least 3 times in the next month?', yes: 1, no: -1 },
+    { text: 'Can you buy this twice right now without stressing about money?', yes: 1, no: -1 },
+    { text: 'Do you already own something that does a similar job?', yes: -1, no: 1 },
+    { text: 'Did you see this advertised somewhere in the last 48 hours?', yes: -1, no: 1 }
+  ];
+
+  let currentItemName = '';
+  let currentPrice = 0;
+  let currentWage = null;
+  let currentQ = 0;
+  let score = 0;
+  let answers = { q1: null, q2: null, q3: null, q4: null };
+
+  // ───────────────────────────────────────────────
+  // Helpers
+  // ───────────────────────────────────────────────
+  function collapseWhitespace(str) {
+    return str.replace(/\s+/g, ' ').trim();
+  }
+
+  function formatMoney(n) {
+    return n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function clearErrors() {
+    itemNameError.textContent = '';
+    priceError.textContent = '';
+  }
+
+  function validateForm() {
+    clearErrors();
+    const name = collapseWhitespace(itemNameInput.value);
+    const priceRaw = priceInput.value;
+    const price = Number.parseFloat(priceRaw);
+
+    let valid = true;
+
+    if (name.length === 0) {
+      itemNameError.textContent = 'Enter what you’re analyzing.';
+      valid = false;
+    }
+
+    if (priceRaw === '' || !Number.isFinite(price) || price < 0) {
+      priceError.textContent = 'Enter a valid price.';
+      valid = false;
+    } else if (price > 1000000) {
+      priceError.textContent = 'Price must be 1,000,000 or less.';
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  function checkFieldsLive() {
+    const name = collapseWhitespace(itemNameInput.value);
+    const price = Number.parseFloat(priceInput.value);
+    const nameOk = name.length > 0;
+    const priceOk = priceInput.value !== '' && Number.isFinite(price) && price >= 0 && price <= 1000000;
+    analyzeBtn.disabled = !(nameOk && priceOk);
+  }
+
+  itemNameInput.addEventListener('input', checkFieldsLive);
+  priceInput.addEventListener('input', checkFieldsLive);
+
+  function switchState(hideEl, showEl) {
+    hideEl.classList.remove('is-active');
+    showEl.classList.add('is-active');
+  }
+
+  function scrollToTool() {
+    toolCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  launchAppBtn.addEventListener('click', scrollToTool);
+
+  // ───────────────────────────────────────────────
+  // STATE A → B
+  // ───────────────────────────────────────────────
+  analyzeBtn.addEventListener('click', () => {
+    if (!validateForm()) return;
+
+    currentItemName = collapseWhitespace(itemNameInput.value);
+    currentPrice = Number.parseFloat(priceInput.value);
+    const wageRaw = wageInput.value;
+    currentWage = (wageRaw !== '' && Number.isFinite(Number.parseFloat(wageRaw)) && Number.parseFloat(wageRaw) > 0)
+      ? Number.parseFloat(wageRaw)
+      : null;
+
+    currentQ = 0;
+    score = 0;
+    answers = { q1: null, q2: null, q3: null, q4: null };
+
+    quizHeaderLine.textContent = 'Analyzing: ' + currentItemName + ' ($' + formatMoney(currentPrice) + ')';
+
+    switchState(stateIntro, stateQuiz);
+    renderQuestion();
+  });
+
+  // ───────────────────────────────────────────────
+  // STATE B — quiz
+  // ───────────────────────────────────────────────
+  function renderQuestion() {
+    Array.from(progressRow.children).forEach((seg, i) => {
+      seg.classList.toggle('filled', i < currentQ);
+    });
+    progressText.textContent = 'Question ' + (currentQ + 1) + ' of ' + QUESTIONS.length;
+    questionText.textContent = QUESTIONS[currentQ].text;
+  }
+
+  function handleAnswer(isYes) {
+    const q = QUESTIONS[currentQ];
+    score += isYes ? q.yes : q.no;
+    answers['q' + (currentQ + 1)] = isYes;
+
+    questionText.classList.add('is-leaving');
+
+    setTimeout(() => {
+      currentQ++;
+      if (currentQ < QUESTIONS.length) {
+        renderQuestion();
+        questionText.classList.remove('is-leaving');
+      } else {
+        Array.from(progressRow.children).forEach(seg => seg.classList.add('filled'));
+        switchState(stateQuiz, stateVerdict);
+        renderVerdict();
+      }
+    }, 160);
+  }
+
+  yesBtn.addEventListener('click', () => handleAnswer(true));
+  noBtn.addEventListener('click', () => handleAnswer(false));
+
+  document.addEventListener('keydown', (e) => {
+    if (!stateQuiz.classList.contains('is-active')) return;
+    const tag = document.activeElement && document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    if (e.key === 'Enter' || e.key.toLowerCase() === 'y') {
+      handleAnswer(true);
+    } else if (e.key.toLowerCase() === 'n') {
+      handleAnswer(false);
+    }
+  });
+
+  // ───────────────────────────────────────────────
+  // STATE C — verdict
+  // ───────────────────────────────────────────────
+  function renderVerdict() {
+    const approved = score > 0;
+    const verdictLabel = approved ? 'Approved' : 'Denied';
+
+    verdictIconApproved.hidden = !approved;
+    verdictIconDenied.hidden = approved;
+
+    verdictTitle.textContent = approved ? 'APPROVED.' : 'DENIED.';
+    verdictBody.textContent = approved
+      ? 'This purchase is justified. Go ahead.'
+      : 'This is an impulse buy. Walk away and save your money.';
+
+    breakdownItem.textContent = currentItemName;
+    breakdownPrice.textContent = '$' + formatMoney(currentPrice);
+    breakdownScore.textContent = 'Score ' + score + ' of 4';
+
+    if (currentWage && currentWage > 0) {
+      const hours = (currentPrice / currentWage).toFixed(1);
+      breakdownHours.textContent = 'That’s ' + hours + ' hours of your life.';
+      breakdownHoursRow.hidden = false;
+    } else {
+      breakdownHoursRow.hidden = true;
+    }
+
+    recordHistory(verdictLabel);
+    saveAnalysis({
+      itemName: currentItemName,
+      price: currentPrice,
+      score: score,
+      verdict: verdictLabel,
+      answers: answers,
+      wageHours: currentWage
+    });
+  }
+
+  // ───────────────────────────────────────────────
+  // Copy result
+  // ───────────────────────────────────────────────
+  copyResultBtn.addEventListener('click', async () => {
+    const approved = score > 0;
+    const lines = [
+      'Buryit verdict: ' + (approved ? 'APPROVED' : 'DENIED'),
+      'Item: ' + currentItemName,
+      'Price: $' + formatMoney(currentPrice),
+      'Score: ' + score + ' of 4'
+    ];
+    if (currentWage && currentWage > 0) {
+      lines.push('Life cost: ' + (currentPrice / currentWage).toFixed(1) + ' hours');
+    }
+    const summary = lines.join('\n');
+
+    try {
+      await navigator.clipboard.writeText(summary);
+      const original = copyResultBtn.textContent;
+      copyResultBtn.textContent = 'Copied ✓';
+      setTimeout(() => { copyResultBtn.textContent = original; }, 1500);
+    } catch (err) {
+      console.warn('[Buryit] clipboard write failed', err);
+    }
+  });
+
+  // ───────────────────────────────────────────────
+  // Reset
+  // ───────────────────────────────────────────────
+  resetBtn.addEventListener('click', () => {
+    itemNameInput.value = '';
+    priceInput.value = '';
+    wageInput.value = '';
+    clearErrors();
+    checkFieldsLive();
+    switchState(stateVerdict, stateIntro);
+  });
+
+  // ───────────────────────────────────────────────
+  // Local persistence
+  // ───────────────────────────────────────────────
+  const HISTORY_KEY = 'buryit.history';
+  const DENIED_TOTAL_KEY = 'buryit.deniedTotal';
+  const HISTORY_CAP = 50;
+
+  function readHistory() {
+    try {
+      const raw = localStorage.getItem(HISTORY_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (err) {
+      return [];
+    }
+  }
+
+  function readDeniedTotal() {
+    const raw = localStorage.getItem(DENIED_TOTAL_KEY);
+    const n = Number.parseFloat(raw);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function recordHistory(verdictLabel) {
+    try {
+      const history = readHistory();
+      history.unshift({
+        itemName: currentItemName,
+        price: currentPrice,
+        verdict: verdictLabel,
+        score: score,
+        at: new Date().toISOString()
+      });
+      const capped = history.slice(0, HISTORY_CAP);
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(capped));
+
+      if (verdictLabel === 'Denied') {
+        const total = readDeniedTotal() + currentPrice;
+        localStorage.setItem(DENIED_TOTAL_KEY, String(total));
+      }
+    } catch (err) {
+      console.warn('[Buryit] local persistence failed', err);
+    }
+
+    renderStatStrip();
+  }
+
+  function renderStatStrip() {
+    const history = readHistory();
+    const deniedTotal = readDeniedTotal();
+    const deniedCount = history.filter(h => h.verdict === 'Denied').length;
+
+    if (deniedCount === 0) {
+      statStrip.classList.remove('is-visible');
+      return;
+    }
+
+    statStripText.textContent = '';
+    const prefix = document.createTextNode('You’ve talked yourself out of ');
+    const strongTotal = document.createElement('strong');
+    strongTotal.textContent = '$' + formatMoney(deniedTotal);
+    const middle = document.createTextNode(' across ');
+    const strongCount = document.createElement('strong');
+    strongCount.textContent = String(deniedCount);
+    const suffix = document.createTextNode(deniedCount === 1 ? ' item.' : ' items.');
+
+    statStripText.appendChild(prefix);
+    statStripText.appendChild(strongTotal);
+    statStripText.appendChild(middle);
+    statStripText.appendChild(strongCount);
+    statStripText.appendChild(suffix);
+
+    statStrip.classList.add('is-visible');
+  }
+
+  statClearBtn.addEventListener('click', () => {
+    const ok = confirm('Clear your Buryit history? This can’t be undone.');
+    if (!ok) return;
+    try {
+      localStorage.removeItem(HISTORY_KEY);
+      localStorage.removeItem(DENIED_TOTAL_KEY);
+    } catch (err) {
+      console.warn('[Buryit] clear failed', err);
+    }
+    renderStatStrip();
+  });
+
+  // ───────────────────────────────────────────────
+  // Init
+  // ───────────────────────────────────────────────
+  copyrightLine.textContent = '© ' + new Date().getFullYear() + ' Buryit';
+  renderStatStrip();
+})();
+</script>
+</body>
+</html>
