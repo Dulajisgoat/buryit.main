@@ -1,1 +1,1 @@
-# Buryit
+[Buryit](https://buryit.pages.dev)
