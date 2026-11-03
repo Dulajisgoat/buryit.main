@@ -10,7 +10,7 @@
 <meta property="og:description" content="Kill impulse buying before it kills your wallet.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary">
-<link rel="icon" type="image/png" href="logo-light.png">
+<link rel="icon" type="image/png" href="logo-tag.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -104,11 +104,15 @@
 
   .fill-ink { fill: var(--ink); }
 
-  /* ---------- Logo (theme-swapped images) ---------- */
-  .brand-logo { display: block; }
-  .logo-dark { display: none; }
-  html[data-theme="dark"] .logo-light { display: none; }
-  html[data-theme="dark"] .logo-dark { display: block; }
+  /* ---------- Logo ---------- */
+  .brand-logo { 
+    display: block; 
+  }
+  
+  /* Invert logo colors in dark mode so the white background becomes black */
+  html[data-theme="dark"] .brand-logo {
+    filter: invert(1) hue-rotate(180deg);
+  }
 
   /* ---------- Header ---------- */
   header.site-header {
@@ -865,8 +869,7 @@
 <header class="site-header">
   <div class="col header-row">
     <a href="./" aria-label="Buryit home" class="brand">
-      <img class="brand-logo logo-light" src="logo-light.png" alt="Buryit" width="32" height="32">
-      <img class="brand-logo logo-dark" src="logo-dark.png" alt="" width="32" height="32" aria-hidden="true">
+      <img class="brand-logo" src="logo-tag.png" alt="Buryit Logo" width="32" height="32">
       <span class="brand-name">Buryit</span>
     </a>
     <div class="header-actions">
