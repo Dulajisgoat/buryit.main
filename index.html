@@ -2182,7 +2182,66 @@
     toolCard.scrollIntoView({ behavior: prefersReducedMotion() ? 'auto' : 'smooth', block: 'start' });
   }
 
-  launchAppBtn.addEventListener('click', scrollToTool);
+  // ───────────────────────────────────────────────
+  // Extension bridge
+  // ───────────────────────────────────────────────
+  const BRIDGE_TIMEOUT_MS = 1500;
+  let bridgeSeq = 0;
+
+  function hasBuryitExtension() {
+    return document.documentElement.hasAttribute('data-buryit-extension');
+  }
+
+  function callExtension(action) {
+    return new Promise(function (resolve) {
+      if (!hasBuryitExtension()) { resolve(null); return; }
+
+      const requestId = 'buryit-' + (++bridgeSeq) + '-' + Date.now();
+      let settled = false;
+      let timer = null;
+
+      function finish(payload) {
+        if (settled) return;
+        settled = true;
+        window.removeEventListener('message', onMessage);
+        clearTimeout(timer);
+        resolve(payload);
+      }
+
+      function onMessage(event) {
+        if (event.source !== window) return;
+        const data = event.data;
+        if (!data || data.source !== 'buryit-extension') return;
+        if (data.requestId !== requestId) return;
+        finish(data.response || null);
+      }
+
+      timer = setTimeout(function () { finish(null); }, BRIDGE_TIMEOUT_MS);
+      window.addEventListener('message', onMessage);
+      window.postMessage(
+        { source: 'buryit-site', action: action, requestId: requestId },
+        '*'
+      );
+    });
+  }
+
+  launchAppBtn.addEventListener('click', async function () {
+    if (hasBuryitExtension()) {
+      const result = await callExtension('openPopup');
+      if (result && result.ok) {
+        showToast('Opened in Buryit extension');
+        return;
+      }
+      // Extension present but couldn't open — usually Chrome < 127 or
+      // the browser dropped the user gesture during the message hop.
+      showToast('Click the Buryit icon in your toolbar to open the extension.');
+      return;
+    }
+
+    // Extension not installed — keep the original in-page behaviour.
+    scrollToTool();
+    showToast('Extension not detected. Use the tool below, or install Buryit.');
+  });
 
   // ───────────────────────────────────────────────
   // STATE A → B
